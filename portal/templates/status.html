@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Authorization Status — ClearPathRx</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: #f0f4f8; }
+    .topbar { background: #1a3f6f; color: white; padding: 14px 40px;
+              display: flex; justify-content: space-between; align-items: center; }
+    .topbar .logo { font-size: 18px; font-weight: bold; }
+    .topbar .logo span { color: #5cbf85; }
+    .topbar a { color: #a8c4e0; font-size: 13px; text-decoration: none; }
+    .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+    h1 { font-size: 22px; color: #1a2e3b; margin-bottom: 6px; }
+    .subtitle { color: #6b7e91; font-size: 14px; margin-bottom: 28px; }
+    .card { background: white; border: 1px solid #d0d9e4; border-radius: 6px;
+            padding: 28px 32px; margin-bottom: 24px; }
+    .card-title { font-size: 12px; font-weight: bold; text-transform: uppercase;
+                  letter-spacing: 0.8px; color: #1a3f6f; margin-bottom: 18px;
+                  padding-bottom: 10px; border-bottom: 1px solid #e8eef4; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px;
+             font-size: 12px; font-weight: bold; text-transform: uppercase; }
+    .badge.pending { background: #fff3cd; color: #856404; }
+    .badge.approved { background: #d1f0df; color: #1a6b3c; }
+    .badge.denied { background: #fde8e8; color: #9b2222; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; margin-top: 16px; }
+    .detail-item label { font-size: 11px; color: #8a9baa; text-transform: uppercase;
+                         letter-spacing: 0.5px; display: block; margin-bottom: 3px; }
+    .detail-item span { font-size: 14px; color: #1a2e3b; }
+    .ref { font-size: 28px; font-weight: bold; color: #1a3f6f; letter-spacing: 2px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 10px 12px; font-size: 11px; text-transform: uppercase;
+         letter-spacing: 0.5px; color: #6b7e91; border-bottom: 2px solid #e8eef4; }
+    td { padding: 12px 12px; border-bottom: 1px solid #f0f4f8; color: #1a2e3b; vertical-align: middle; }
+    tr:hover td { background: #f8fafc; }
+    .new-btn { display: inline-block; margin-top: 20px; padding: 12px 24px;
+               background: #1a3f6f; color: white; text-decoration: none;
+               border-radius: 4px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="logo">ClearPath<span>Rx</span> — Prior Authorization Portal</div>
+    <a href="/logout">Sign Out</a>
+  </div>
+  <div class="container">
+    <h1>Authorization Status</h1>
+    <p class="subtitle">Track submitted prior authorization requests.</p>
+
+    {% if record %}
+    <div class="card">
+      <div class="card-title">Most Recent Submission</div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div class="ref" id="pa-ref">PA-{{ record.id }}</div>
+          <div style="color:#6b7e91; font-size:13px; margin-top:4px;">
+            Submitted {{ record.submitted_at[:10] }} — {{ record.payer }}
+          </div>
+        </div>
+        <span class="badge {{ record.status | lower }}">{{ record.status }}</span>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>Patient</label>
+          <span id="pa-patient">{{ record.patient_name }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Date of Birth</label>
+          <span>{{ record.dob }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Diagnosis (ICD-10)</label>
+          <span>{{ record.diagnosis_code }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Procedure (CPT)</label>
+          <span>{{ record.cpt_code }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Provider NPI</label>
+          <span>{{ record.provider_npi }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Requested Units</label>
+          <span>{{ record.requested_units }}</span>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-title">All Submissions</div>
+      {% if all_records %}
+      <table>
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Patient</th>
+            <th>Payer</th>
+            <th>Diagnosis</th>
+            <th>Submitted</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in all_records %}
+          <tr>
+            <td><strong>PA-{{ r.id }}</strong></td>
+            <td>{{ r.patient_name }}</td>
+            <td>{{ r.payer }}</td>
+            <td>{{ r.diagnosis_code }}</td>
+            <td>{{ r.submitted_at[:10] }}</td>
+            <td><span class="badge {{ r.status | lower }}">{{ r.status }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p style="color:#8a9baa; font-size:14px;">No submissions yet.</p>
+      {% endif %}
+    </div>
+
+    <a href="/submit" class="new-btn">+ New Authorization Request</a>
+  </div>
+</body>
+</html>

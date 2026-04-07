@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Silna PA Demo — Results Dashboard</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap');
+
+    :root {
+      --navy:   #1a3f6f;
+      --green:  #2e8b57;
+      --slate:  #445566;
+      --light:  #f0f4f8;
+      --border: #d0d9e4;
+      --text:   #1a2e3b;
+      --muted:  #6b7e91;
+      --ok:     #d1f0df;
+      --ok-txt: #1a6b3c;
+      --err:    #fde8e8;
+      --err-txt:#9b2222;
+      --warn:   #fff3cd;
+      --warn-txt:#856404;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--light);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: var(--navy);
+      color: white;
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .topbar .brand { font-size: 18px; font-weight: 700; letter-spacing: -0.3px; }
+    .topbar .brand span { color: #5cbf85; }
+    .topbar .meta { font-size: 12px; color: #a8c4e0; font-family: 'IBM Plex Mono', monospace; }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 36px auto; padding: 0 24px; }
+
+    h2 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--navy);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+
+    /* ── Metric row ── */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .metric {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px 22px;
+    }
+    .metric .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .metric .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--navy);
+      font-family: 'IBM Plex Mono', monospace;
+      line-height: 1;
+    }
+    .metric .value.green { color: var(--green); }
+    .metric .sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ── Status banner ── */
+    .banner {
+      padding: 14px 20px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .banner.success { background: var(--ok); color: var(--ok-txt); border: 1px solid #a3dfc0; }
+    .banner.failure { background: var(--err); color: var(--err-txt); border: 1px solid #f5b7b7; }
+
+    /* ── Fields grid ── */
+    .fields-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px 32px;
+    }
+    .field-item .field-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+    .field-item .field-value {
+      font-size: 14px;
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+    }
+    .field-item.full { grid-column: 1 / -1; }
+    .field-item .field-value.notes {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      color: var(--slate);
+      line-height: 1.6;
+    }
+
+    /* ── Steps table ── */
+    .steps-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .steps-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      border-bottom: 2px solid var(--border);
+    }
+    .steps-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--light);
+      vertical-align: middle;
+    }
+    .steps-table tr:hover td { background: #f8fafc; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge.ok    { background: var(--ok);   color: var(--ok-txt); }
+    .badge.error { background: var(--err);  color: var(--err-txt); }
+    .badge.info  { background: #e8eef8;     color: var(--navy); }
+
+    .mono { font-family: 'IBM Plex Mono', monospace; }
+
+    /* ── Raw JSON ── */
+    .json-block {
+      background: #1a2e3b;
+      color: #a8d8b8;
+      padding: 20px;
+      border-radius: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* ── Loading / error states ── */
+    .state-msg {
+      text-align: center;
+      padding: 60px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 32px 0 48px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Silna PA Demo — <span>Results Dashboard</span></div>
+  <div class="meta" id="run-time">Loading...</div>
+</div>
+
+<div class="container">
+
+  <div id="banner" class="banner" style="display:none"></div>
+
+  <!-- Metrics -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="label">PA Reference</div>
+      <div class="value mono" id="m-ref" style="font-size:20px">—</div>
+      <div class="sub">Confirmed on portal</div>
+    </div>
+    <div class="metric">
+      <div class="label">Total Time</div>
+      <div class="value green" id="m-time">—</div>
+      <div class="sub">Extract → Submit → Verify</div>
+    </div>
+    <div class="metric">
+      <div class="label">Steps Logged</div>
+      <div class="value" id="m-steps">—</div>
+      <div class="sub">Agent actions recorded</div>
+    </div>
+    <div class="metric">
+      <div class="label">Fields Extracted</div>
+      <div class="value" id="m-fields">—</div>
+      <div class="sub">From treatment plan PDF</div>
+    </div>
+    <div class="metric">
+      <div class="label">Follow-up Status</div>
+      <div class="value mono" id="m-status" style="font-size:20px">—</div>
+      <div class="sub">Retrieved by status check agent</div>
+    </div>
+  </div>
+
+  <!-- Extracted Fields -->
+  <div class="card">
+    <h2>Document Intelligence — Extracted Fields</h2>
+    <div class="fields-grid" id="fields-grid">
+      <div class="state-msg">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Extraction Metadata -->
+  <div class="card">
+    <h2>Extraction Metadata</h2>
+    <div class="fields-grid" id="meta-grid">
+      <div class="state-msg">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Agent Steps -->
+  <div class="card">
+    <h2>Agent Run Log</h2>
+    <table class="steps-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Elapsed</th>
+          <th>Action</th>
+          <th>Detail</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="steps-body">
+        <tr><td colspan="5" class="state-msg">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Raw JSON -->
+  <div class="card">
+    <h2>Raw Output JSON</h2>
+    <div class="json-block" id="raw-json">Loading...</div>
+  </div>
+
+  <div class="footer">
+    Silna PA Demo · Built for AI Deployment Analyst Application · April 2026
+  </div>
+</div>
+
+<script>
+  // ── Load agent_run.json ──────────────────────────────────────────────────
+  // Because this is a local file, serve via Flask or open via the portal.
+  // Falls back to fetching from the portal's /api/records if needed.
+
+  const AGENT_RUN_PATH = "../outputs/agent_run.json";
+    async function loadData() {
+    showState("loading");
+    try {
+        const res = await fetch(AGENT_RUN_PATH);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        render(data);
+    } catch (e) {
+        showState("error", e.message);
+    }
+    }
+
+    function showState(type, detail = "") {
+    if (type === "loading") {
+        document.getElementById("raw-json").textContent = "Loading...";
+        return;
+    }
+    if (type === "error") {
+        // Replace the entire container content with a clear error panel
+        document.querySelector(".container").innerHTML = `
+        <div style="
+            max-width: 580px; margin: 80px auto; background: white;
+            border: 1px solid var(--border); border-radius: 6px;
+            padding: 40px 44px; text-align: center;
+        ">
+            <div style="font-size: 32px; margin-bottom: 16px;">⚠️</div>
+            <div style="font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 10px;">
+            Could not load agent run data
+            </div>
+            <div style="font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.7;">
+            The dashboard must be served through Flask to fetch
+            <code style="background:var(--light); padding:2px 6px; border-radius:3px;">agent_run.json</code>
+            correctly. Opening <code style="background:var(--light); padding:2px 6px; border-radius:3px;">index.html</code>
+            directly from the filesystem will not work due to browser security restrictions.
+            </div>
+            <div style="
+            background: var(--light); border: 1px solid var(--border);
+            border-radius: 6px; padding: 16px 20px; text-align: left;
+            font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+            color: var(--slate); line-height: 2;
+            ">
+            <div style="color:var(--muted); margin-bottom:4px"># Start the portal first:</div>
+            cd portal && python app.py
+            <div style="color:var(--muted); margin-top:8px; margin-bottom:4px"># Then open:</div>
+            http://127.0.0.1:5050/dashboard
+            </div>
+            <div style="margin-top: 20px; font-size: 11px; color: var(--muted);">
+            Fetch error: ${detail}
+            </div>
+        </div>
+        `;
+    }
+    }
+  function render(d) {
+    // Banner
+    const banner = document.getElementById("banner");
+    banner.style.display = "flex";
+    if (d.success) {
+        banner.className = "banner success";
+        banner.innerHTML = `✓ &nbsp;Agent run succeeded — PA ${d.pa_reference} submitted and confirmed`;
+    } else {
+        banner.className = "banner failure";
+        banner.innerHTML = `✗ &nbsp;Agent run failed — check steps log below`;
+    }
+
+    // Run time in topbar
+    document.getElementById("run-time").textContent =
+        `Run completed · ${d.agent_steps?.at(-1)?.timestamp?.slice(0,19).replace("T"," ") ?? ""}`;
+
+    // Metrics
+    document.getElementById("m-ref").textContent   = d.pa_reference ?? "N/A";
+    document.getElementById("m-time").textContent  = d.total_elapsed_seconds + "s";
+    document.getElementById("m-steps").textContent = d.agent_steps?.length ?? 0;
+    document.getElementById("m-fields").textContent =
+        Object.keys(d.portal_fields_submitted ?? {}).length;
+
+    // Follow-up status metric
+    const statusVal = d.pa_status_after_followup ?? "—";
+    const statusEl = document.getElementById("m-status");
+    if (statusEl) {
+        statusEl.textContent = statusVal;
+        statusEl.className = "value " +
+        (statusVal === "APPROVED" ? "green" : "");
+    }
+
+    // Extracted fields
+    const fg = document.getElementById("fields-grid");
+    fg.innerHTML = "";
+    const fields = d.portal_fields_submitted ?? {};
+    const labels = {
+      patient_name:    "Patient Name",
+      dob:             "Date of Birth",
+      diagnosis_code:  "Diagnosis (ICD-10)",
+      cpt_code:        "Procedure (CPT)",
+      provider_npi:    "Provider NPI",
+      requested_units: "Requested Units",
+      payer:           "Insurance Payer",
+      notes:           "Medical Necessity Summary",
+    };
+    for (const [key, label] of Object.entries(labels)) {
+      const val = fields[key] ?? "—";
+      const isFull = key === "notes";
+      fg.innerHTML += `
+        <div class="field-item ${isFull ? "full" : ""}">
+          <div class="field-label">${label}</div>
+          <div class="field-value ${isFull ? "notes" : ""}">${val}</div>
+        </div>`;
+    }
+
+    // Metadata
+    const mg = document.getElementById("meta-grid");
+    mg.innerHTML = "";
+    const meta = d.extraction_metadata ?? {};
+    const metaLabels = {
+      source_file:     "Source Document",
+      model:           "Claude Model",
+      input_tokens:    "Input Tokens",
+      output_tokens:   "Output Tokens",
+      elapsed_seconds: "Extraction Time (s)",
+    };
+    for (const [key, label] of Object.entries(metaLabels)) {
+      mg.innerHTML += `
+        <div class="field-item">
+          <div class="field-label">${label}</div>
+          <div class="field-value">${meta[key] ?? "—"}</div>
+        </div>`;
+    }
+
+    // Steps
+    const tbody = document.getElementById("steps-body");
+    tbody.innerHTML = "";
+    (d.agent_steps ?? []).forEach((step, i) => {
+      const badgeClass = step.status === "ok" ? "ok" : step.status === "error" ? "error" : "info";
+      const icon = step.status === "ok" ? "✓" : step.status === "error" ? "✗" : "·";
+      tbody.innerHTML += `
+        <tr>
+          <td class="mono" style="color:var(--muted)">${String(i+1).padStart(2,"0")}</td>
+          <td class="mono" style="color:var(--muted)">${step.elapsed_s}s</td>
+          <td>${step.action}</td>
+          <td style="color:var(--slate); font-size:12px">${step.detail ?? ""}</td>
+          <td><span class="badge ${badgeClass}">${icon} ${step.status}</span></td>
+        </tr>`;
+    });
+
+    // Raw JSON
+    document.getElementById("raw-json").textContent = JSON.stringify(d, null, 2);
+  }
+
+  loadData();
+</script>
+<noscript>
+  <div style="
+    font-family: sans-serif; max-width: 500px; margin: 80px auto;
+    padding: 32px; background: #fff3cd; border: 1px solid #f0c040;
+    border-radius: 6px; text-align: center; color: #856404;
+  ">
+    <strong>JavaScript is required</strong> to run this dashboard.
+    Please enable JavaScript and open via
+    <code>http://127.0.0.1:5050/dashboard</code>.
+  </div>
+</noscript>
+</body>
+</html>

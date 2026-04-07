@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Submit Prior Authorization — ClearPathRx</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: #f0f4f8; }
+    .topbar { background: #1a3f6f; color: white; padding: 14px 40px;
+              display: flex; justify-content: space-between; align-items: center; }
+    .topbar .logo { font-size: 18px; font-weight: bold; letter-spacing: -0.3px; }
+    .topbar .logo span { color: #5cbf85; }
+    .topbar a { color: #a8c4e0; font-size: 13px; text-decoration: none; }
+    .container { max-width: 720px; margin: 40px auto; padding: 0 20px; }
+    h1 { font-size: 22px; color: #1a2e3b; margin-bottom: 6px; }
+    .subtitle { color: #6b7e91; font-size: 14px; margin-bottom: 32px; }
+    .section { background: white; border: 1px solid #d0d9e4; border-radius: 6px;
+               padding: 28px 32px; margin-bottom: 20px; }
+    .section-title { font-size: 12px; font-weight: bold; text-transform: uppercase;
+                     letter-spacing: 0.8px; color: #1a3f6f; margin-bottom: 20px;
+                     padding-bottom: 10px; border-bottom: 1px solid #e8eef4; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    label { display: block; font-size: 12px; color: #445566; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+    input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #c8d4df;
+            border-radius: 4px; font-size: 14px; color: #1a2e3b; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #1a3f6f; }
+    textarea { resize: vertical; min-height: 80px; }
+    .field { margin-bottom: 16px; }
+    button[type=submit] { width: 100%; padding: 14px; background: #2e8b57;
+              color: white; font-size: 15px; border: none; border-radius: 4px;
+              cursor: pointer; margin-top: 8px; font-family: inherit; }
+    button[type=submit]:hover { background: #267348; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="logo">ClearPath<span>Rx</span> — Prior Authorization Portal</div>
+    <a href="/logout">Sign Out</a>
+  </div>
+  <div class="container">
+    <h1>New Prior Authorization Request</h1>
+    <p class="subtitle">Complete all required fields. Submissions are reviewed within 2–5 business days.</p>
+    <form method="POST" id="pa-form">
+
+      <div class="section">
+        <div class="section-title">Patient Information</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Patient Full Name</label>
+            <input type="text" name="patient_name" id="patient_name" required>
+          </div>
+          <div class="field">
+            <label>Date of Birth</label>
+            <input type="date" name="dob" id="dob" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Clinical Details</div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Primary Diagnosis Code (ICD-10)</label>
+            <input type="text" name="diagnosis_code" id="diagnosis_code"
+                   placeholder="e.g. F84.0" required>
+          </div>
+          <div class="field">
+            <label>Procedure Code (CPT)</label>
+            <input type="text" name="cpt_code" id="cpt_code"
+                   placeholder="e.g. 97153" required>
+          </div>
+          <div class="field">
+            <label>Requesting Provider NPI</label>
+            <input type="text" name="provider_npi" id="provider_npi"
+                   placeholder="10-digit NPI" required>
+          </div>
+          <div class="field">
+            <label>Requested Units / Hours</label>
+            <input type="text" name="requested_units" id="requested_units"
+                   placeholder="e.g. 120 units/month" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Payer & Authorization</div>
+        <div class="field">
+          <label>Insurance Payer</label>
+          <select name="payer" id="payer" required>
+            <option value="">— Select Payer —</option>
+            <option value="Aetna">Aetna</option>
+            <option value="Anthem">Anthem Blue Cross Blue Shield</option>
+            <option value="Cigna">Cigna</option>
+            <option value="United Healthcare">United Healthcare</option>
+            <option value="Humana">Humana</option>
+            <option value="Medicaid - NY">Medicaid — New York</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Medical Necessity Notes</label>
+          <textarea name="notes" id="notes"
+            placeholder="Summarize clinical justification for the requested service..."></textarea>
+        </div>
+      </div>
+
+      <button type="submit" id="submit-btn">Submit Prior Authorization Request</button>
+    </form>
+  </div>
+</body>
+</html>
