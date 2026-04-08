@@ -1,11 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import json, uuid, datetime, os
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 app.secret_key = "silna-demo-secret"
 STORAGE_FILE = os.path.join(os.path.dirname(__file__), "storage.json")
 
-MOCK_CREDENTIALS = {"username": "provider_demo", "password": "Silna2024!"}
+load_dotenv()
+USERNAME         = os.getenv("PORTAL_USERNAME")
+PASSWORD         = os.getenv("PORTAL_PASSWORD")
+MOCK_CREDENTIALS = {"username": USERNAME, "password": PASSWORD}
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
