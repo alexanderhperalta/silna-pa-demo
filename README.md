@@ -44,7 +44,7 @@ pa-demo/
 
 ```bash
 # Clone and create virtual environment
-git clone <[repo-url](https://github.com/alexanderhperalta/pa-demo)>
+git clone https://github.com/alexanderhperalta/pa-demo
 cd pa-demo
 python -m venv venv
 source venv/bin/activate
