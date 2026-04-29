@@ -1,6 +1,6 @@
 """
 Generates a realistic synthetic ABA treatment plan PDF.
-This is the input document the Claude extractor will parse.
+This is the PDF input document the Claude extractor will parse.
 """
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle

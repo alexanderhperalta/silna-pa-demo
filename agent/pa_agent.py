@@ -24,7 +24,7 @@ PASSWORD      = os.getenv("PORTAL_PASSWORD")
 PDF_PATH      = str(Path(__file__).parent.parent / "sample_docs" / "treatment_plan.pdf")
 OUTPUT_PATH   = str(Path(__file__).parent.parent / "outputs" / "agent_run.json")
 
-# ── Payer Normalization ───────────────────────────────────────────────────────
+# ── Payer Normalization ─────────────────────────────────────────────────────
 
 # Canonical portal options: {display_label: value_attribute}
 PORTAL_PAYERS = {
